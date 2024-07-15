@@ -14,7 +14,7 @@
   "portMappings": [],
   "command": null,
   "linuxParameters": null,
-  "cpu": 0,
+  "cpu": ${cpu},
   "environment": [
     {
       "name": "CRYPTO",
@@ -22,11 +22,17 @@
     },
     {
       "name": "CUSTOM_OPTS",
-      "value": " -Djdbc.host=${db_host} -Djdbc.user=${db_user} -Dligoj.plugin.install=${ligoj_plugins} -Dserver.forward-headers-strategy=NATIVE -Djdbc.urlparamCustom=\"&useSSL=TRUE\""
+      "value": " -Djdbc.host=${db_host} -Djdbc.user=${db_user} -Dligoj.plugin.install=${ligoj_plugins} -Dserver.forward-headers-strategy=NATIVE -XX:ActiveProcessorCount=${nb_cpu}"
     }
   ],
   "resourceRequirements": null,
-  "ulimits": null,
+  "ulimits": [
+    {
+       "name": "nofile",
+       "softLimit": 2048,
+       "hardLimit": 8192
+    }
+  ],
   "dnsServers": null,
   "mountPoints": [
     {

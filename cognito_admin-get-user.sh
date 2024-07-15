@@ -5,7 +5,15 @@
 #  by Irving Popovetsky <irving@popovetsky.com> 
 #
 
+LOG_FILE="cognito_admin-get-user.log"
+MESSAGES="[]"
+function log_info() {
+  local MSG="$1"
+  echo "INFO  $MSG" >>"$LOG_FILE"
+  MESSAGES="$(echo "$MESSAGES" | jq --arg MSG "$MSG" '. += [$MSG|gsub("^(\\s|\\n)+|(\\s|\\n)+$";"")]')"
+}
 function error_exit() {
+  echo "ERROR: $1" >> "$LOG_FILE"
   echo "$1" 1>&2
   exit 1
 }
@@ -23,14 +31,19 @@ function parse_input() {
   if [[ -z "${USERNAME}" ]]; then export USERNAME=none; fi
 }
 
-function create_user() {
-    #echo "$(aws cognito-idp admin-get-user --user-pool-id "$USER_POOL_ID" --profile "$PROFILE" --username "$USERNAME")" >> '/Users/fabdouglas/git/live-carto/scripts/ligoj-terraform/out.txt'
-    aws cognito-idp admin-get-user --user-pool-id "$USER_POOL_ID" --profile "$PROFILE" --username "$USERNAME" | jq '{username : .Username}'
+function get_user() {
+    log_info "Get cognito user $USERNAME@$USER_POOL_ID (profile=$PROFILE)"
+    local result="$(aws cognito-idp admin-get-user --user-pool-id "$USER_POOL_ID" --profile "$PROFILE" --username "$USERNAME" 2>> $LOG_FILE)"
+    log_info "$result"
+    echo -n "${result}" | jq '{username : .Username}'
 }
 
-# main()
-check_deps
-# echo "DEBUG: received: $INPUT" 1>&2
-parse_input
+function main() {
+  check_deps
+  # echo "DEBUG: received: $INPUT" 1>&2
+  parse_input
+  get_user
+}
 
-create_user
+main
+exit 0

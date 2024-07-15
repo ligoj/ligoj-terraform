@@ -1,5 +1,5 @@
 resource aws_lambda_function post_confirmation {
-  filename         = "lambda_post_confirmation.zip"
+  filename         = ".terraform/lambda_post_confirmation.zip"
   function_name    = local.lambda_post_confirmation_name
   role             = aws_iam_role.post_confirmation.arn
   handler          = "index.handler"
@@ -20,7 +20,7 @@ resource aws_lambda_function post_confirmation {
 
 data archive_file post_confirmation {
   type        = "zip"
-  output_path = "lambda_post_confirmation.zip"
+  output_path = ".terraform/lambda_post_confirmation.zip"
   source {
     content  = file("lambda_post_confirmation.js")
     filename = "index.js"
@@ -89,7 +89,7 @@ EOF
 
 resource aws_cloudwatch_log_group post_confirmation {
   name              = "/aws/lambda/${local.lambda_post_confirmation_name}"
-  retention_in_days = 14
+  retention_in_days = var.expiration
   tags              = local.tags
 }
 

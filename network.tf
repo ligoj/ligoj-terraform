@@ -1,4 +1,4 @@
-resource aws_vpc main {
+resource "aws_vpc" "main" {
   cidr_block           = var.cidr
   instance_tenancy     = "default"
   tags                 = local.tags
@@ -12,14 +12,14 @@ resource "aws_default_security_group" "default" {
   ingress = []
   egress  = []
 }
-resource aws_internet_gateway main {
+resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags   = local.tags
 }
 
-data aws_availability_zones main {}
+data "aws_availability_zones" "main" {}
 
-resource aws_subnet main {
+resource "aws_subnet" "main" {
   count                   = var.nb_subnets
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.cidr, var.cidr_newbits, count.index)
@@ -29,7 +29,7 @@ resource aws_subnet main {
   depends_on              = [aws_internet_gateway.main]
 }
 
-resource aws_route_table main {
+resource "aws_route_table" "main" {
   vpc_id = aws_vpc.main.id
   tags   = local.tags
   route {
@@ -37,7 +37,7 @@ resource aws_route_table main {
     gateway_id = aws_internet_gateway.main.id
   }
 }
-resource aws_route_table_association main {
+resource "aws_route_table_association" "main" {
   count          = var.nb_subnets
   subnet_id      = element(aws_subnet.main.*.id, count.index)
   route_table_id = aws_route_table.main.id

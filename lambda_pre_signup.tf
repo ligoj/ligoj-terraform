@@ -1,5 +1,5 @@
 resource aws_lambda_function pre_sign_up {
-  filename         = "lambda_pre_signup.zip"
+  filename         = ".terraform/lambda_pre_signup.zip"
   function_name    = local.lambda_pre_sign_up_name
   role             = aws_iam_role.pre_sign_up.arn
   handler          = "index.handler"
@@ -16,7 +16,7 @@ resource aws_lambda_function pre_sign_up {
 
 data archive_file pre_sign_up {
   type        = "zip"
-  output_path = "lambda_pre_signup.zip"
+  output_path = ".terraform/lambda_pre_signup.zip"
   source {
     content  = templatefile("lambda_pre_signup.js", local.tags)
     filename = "index.js"

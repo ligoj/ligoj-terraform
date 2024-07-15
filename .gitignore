@@ -6,7 +6,7 @@
 *.tfstate.*
 
 # Crash log files
-crash.log
+*.log
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
 # .tfvars files are managed as part of configuration and so should be included in
@@ -27,5 +27,9 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+main-private.*.tfvars
 *.auto.tfvars
 *.zip
+**/node_modules
+**.hcl
+README.*.md

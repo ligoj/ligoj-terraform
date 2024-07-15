@@ -8,20 +8,21 @@ resource aws_iam_service_linked_role "ecs" {
 }
 */
 
-resource aws_ecs_service main {
+resource "aws_ecs_service" "main" {
   name             = local.name
   cluster          = aws_ecs_cluster.main.id
   task_definition  = aws_ecs_task_definition.main.arn
   desired_count    = var.desired_count
   launch_type      = "FARGATE"
   platform_version = "1.4.0"
+  tags             = local.tags
   network_configuration {
     security_groups  = [aws_security_group.ecs.id]
     subnets          = aws_subnet.main.*.id
     assign_public_ip = true
   }
 
-  dynamic load_balancer {
+  dynamic "load_balancer" {
     iterator = container
     for_each = keys(var.container_port)
     content {
@@ -32,11 +33,11 @@ resource aws_ecs_service main {
   }
 }
 
-resource aws_cloudwatch_log_group app_ui {
+resource "aws_cloudwatch_log_group" "app_ui" {
   name = "/ecs/ligoj-ui-${var.environment}"
   tags = local.tags
 }
-resource aws_cloudwatch_log_group app_api {
+resource "aws_cloudwatch_log_group" "app_api" {
   name = "/ecs/ligoj-api-${var.environment}"
   tags = local.tags
 }

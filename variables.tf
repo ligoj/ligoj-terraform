@@ -8,14 +8,22 @@ variable "environment" {
   default     = "prod"
 }
 variable "region" {
-  type    = string
   default = "eu-west-1"
 }
 variable "profile" {
-  default = "ligoj"
-}
-variable "container_protocol" {
   type    = string
+  default = null
+}
+
+variable "account" {
+  type = string
+}
+
+variable "expiration" {
+  default = 14
+}
+
+variable "container_protocol" {
   default = "HTTP"
 }
 variable "dns" {
@@ -31,10 +39,10 @@ variable "desired_count" {
   default = 1
 }
 variable "cpu" {
-  default = "2048"
+  default = 2
 }
 variable "ram" {
-  default = "8192"
+  default = 8192
 }
 variable "container_route_private" {
   default = {
@@ -86,7 +94,6 @@ variable "cognito_email_verification_subject" {
 variable "cognito_email_verification_message" {
   default = "Your verification code is {####}"
 }
-
 variable "cognito_reply" {
   default = ""
 }
@@ -102,7 +109,6 @@ variable "cognito_admin" {
 variable "cognito_dns_prefix" {
   default = "login"
 }
-
 variable "ligoj_plugins" {
   default = "plugin-id,plugin-id-cognito"
 }
@@ -115,12 +121,15 @@ variable "ligoj_sign_up_project" {
 variable "engine_version" {
   # select AURORA_VERSION();
   # aws rds describe-db-clusters --db-cluster-identifier ligoj-prod
-  #engine_version = "5.7"
-  default = "5.7.mysql_aurora.2.07.1"
+  # aws rds describe-orderable-db-instance-options --engine aurora-mysql --db-instance-class db.serverless \
+  #     --region eu-west-3 --query 'OrderableDBInstanceOptions[].[EngineVersion]' --output text --profile kloudy-website
+  default = "8.0.mysql_aurora.3.02.0" # Serverless v2
+  #default = "5.7.mysql_aurora.2.07.1" # Serverless v1
+  #default = "5.7" # RDS
 }
 
 variable "ligoj_version" {
-  default = "3.2.0"
+  default = "3.2.3"
 }
 variable "enabled" {
   default = true
@@ -145,4 +154,14 @@ variable "cognito_email_filter_message" {
 
 variable "ligoj_sign_up_subscription" {
   default = [{ node = "service:prov:aws:sandbox", mode = "create", parameters = [] }]
+}
+
+variable "aurora_min_capacity" {
+  default = 0.5
+}
+variable "aurora_max_capacity" {
+  default = 128
+}
+variable "docker_repository" {
+  default = ""
 }

@@ -38,4 +38,11 @@ cognito_from="Ligoj <ligoj@internal.com>"
 cognito_email_filter = "(custom@external.com|.*@internal.com)"
 cognito_email_filter_message = "Only internal staff can signup to this application"
 cognito_admin = "ligoj-admin@internal.com"
+```
+
+# Terraform deployment
+
 ``` bash
+terraform init -backend-config="profile=ligoj" -backend-config="profile=ligoj" -reconfigure
+terraform apply -var-file="main.sample.tfvars" -var profile="ligoj" -auto-approve
+```

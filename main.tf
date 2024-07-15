@@ -1,7 +1,7 @@
 locals {
   name                 = "${var.application}-${var.environment}"
   cognito_dns          = "${var.cognito_dns_prefix}.${local.dns}"
-  dns                  = var.dns == "" ? "${var.application}.${dns_zone}" : var.dns
+  dns                  = var.dns == "" ? "${var.application}.${var.dns_zone}" : var.dns
   cognito_reply        = var.cognito_reply == "" ? "NO_REPLY<no-reply@${local.dns}>" : var.cognito_reply
   cognito_from         = var.cognito_from == "" ? "${title(var.application)} <${var.application}@${local.dns}>" : var.cognito_from
   cognito_email_filter = var.cognito_email_filter == "" ? ".*@${local.dns}" : var.cognito_email_filter
@@ -19,7 +19,7 @@ locals {
     cognito_dns    = var.cognito_dns
     dns            = local.dns
     cognito_client = aws_cognito_user_pool_client.main.id
-    repository     = ""
+    repository     = var.docker_repository
     region         = var.region
     environment    = var.environment
   }
