@@ -1,7 +1,6 @@
 'use strict'
-const AWS = require('aws-sdk');
-const secretsmanager = new AWS.SecretsManager({
-    apiVersion: '2017-10-17',
+const { SecretsManager } = require('@aws-sdk/client-secrets-manager');
+const secretsmanager = new SecretsManager({
     region: process.env.AWS_DEFAULT_REGION
 });
 const https = require('https');
@@ -14,10 +13,11 @@ async function callApi(method, path, parameters, data, apiContext) {
         'api-key': credentials.key
     });
 
-    let options = Object.assign({}, apiContext.options, {
-        method: method,
+    let options = {
+        ...apiContext.options,
+        method,
         path: `/${apiContext.options.path}/${path}?${qsString}${parameters ? `&${parameters}` : ''}`
-    });
+    };
     console.log(method + ' ' + path + (parameters ? '?' + parameters : ''), data);
     return new Promise((resolve, reject) => {
         const req = https.request(options, res => {
@@ -58,9 +58,9 @@ exports.handler = async (event, context) => {
     let username = event.userName;
 
     // Get API key from secret
-    let secretHolder = await secretsmanager.getSecretValue({
+    const secretHolder = await secretsmanager.getSecretValue({
         SecretId: secretArn
-    }).promise();
+    });
     let credentials = JSON.parse(secretHolder.SecretString);
     console.log("secretData", credentials);
     let apiOptions = {
@@ -91,7 +91,7 @@ async function getRoleByName(apiContext, role) {
 async function completeData(apiContext, username, email, grantRole, createProject, createSubscriptions) {
     let userRoles = await callApi('GET', `system/user/roles`, `filters=${encodeURIComponent(JSON.stringify({ rules: [{ op: 'eq', field: 'login', data: username }] }))}`, null, apiContext);
     console.log("userRoles", userRoles);
-    if (userRoles && userRoles.data && userRoles.data.length) {
+    if (userRoles?.data?.length) {
         // User exists
         console.log("User already exists, add missing roles as needed");
         if (grantRole && userRoles.data[0].roles.filter(r => r === grantRole).length === 0) {
@@ -117,7 +117,7 @@ async function completeData(apiContext, username, email, grantRole, createProjec
         if (project === null) {
             // Project does not exist yet, create it
             let projectName = `Welcome ${email}`;
-            projectId = await callApi('POST', `project`, null, { pkey: projectKey, name: projectName, teamLeader: username , description : `Personal project of ${username}`}, apiContext);
+            projectId = await callApi('POST', `project`, null, { pkey: projectKey, name: projectName, teamLeader: username, description: `Personal project of ${username}` }, apiContext);
             console.log("Project created", projectId);
         } else {
             projectId = project.id;
@@ -127,7 +127,7 @@ async function completeData(apiContext, username, email, grantRole, createProjec
         let subscriptions = createSubscriptions.filter(s1 => project === null || project.subscriptions.filter(s0 => s0.node.id === s1.node).length === 0);
         for (let s of subscriptions) {
             console.log("Subscription create ...", s);
-            let subscriptionId = await callApi('POST', `subscription`, null, Object.assign(Object.assign({ mode: 'create' }, s), { project: projectId, node: s.node, parameters: s.parameters || [] }), apiContext);
+            let subscriptionId = await callApi('POST', `subscription`, null, { mode: 'create', ...s, project: projectId, node: s.node, parameters: s.parameters || [] }, apiContext);
             console.log("Subscription created", subscriptionId);
         }
     }
